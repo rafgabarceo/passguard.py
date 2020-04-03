@@ -13,5 +13,5 @@ print("Creating secure notes table")
 conn.commit()
 conn.close()
 
-import loginScreen
+from scripts import loginScreen
 loginScreen
