@@ -4,7 +4,9 @@ import getpass as getpass
 import time
 import sys
 import os.path
+from tabulate import tabulate
 from os import path
+import pyperclip
 passguardWelcome = "Welcome to Passguard.py!".center(100,"=")
 passguard = "Passguard.py".center(100,"=")
 def cls():
@@ -18,7 +20,7 @@ def initializeDatabase():
     print("Creating master_table table")
     c.execute("CREATE TABLE master_user_password (master_username, master_password)")
     print("Creating login table")
-    c.execute("CREATE TABLE user_password (username, password, website)")
+    c.execute("CREATE TABLE user_password (name, username, password, website)")
     print("Creating secure notes table")
     c.execute("CREATE TABLE secure_notes (title, notes)")
     conn.commit()
@@ -34,17 +36,11 @@ def createLoginInfo():
 
     master_username = input("Please enter your master username: ")
     master_password = input("Please enter your master password: ")
-    print(master_password)
     master_tuple = (master_username, master_password)
-    print(master_tuple)
-    c.execute('SELECT * FROM master_user_password')
-    c.execute('INSERT INTO master_user_password VALUES (?, ?)', master_tuple)
-    a = c.fetchone()
-    print(a)
-
+    c.execute('INSERT INTO master_user_password (master_username, master_password) VALUES (?, ?)', master_tuple)
     conn.commit()
     conn.close()
-    cls()
+    #cls()
 
 def loginScreen():
     conn = sqlite3.connect("database.db")
@@ -91,22 +87,62 @@ def mainMenu():
             os._exit(1)
 
 def passwordMenu():
-    print("Passguard.py - Login Info".center(100,"="))
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute("SELECT username AND password FROM user_password")
-    a = c.fetchall()
-    print("These are your logins. What would you like to do?")
-    x = input()
+    while True:
+        print("Passguard.py - Login Info".center(100,"="))
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute("SELECT name, username, website FROM user_password")
+        a = c.fetchall()
+        conn.commit()
+        conn.close
+        print(a)
+        print(tabulate(a, headers=['name','username','website'], tablefmt='github'))
+        userChoice = input("\nWhat would you like to do?\n[1] View Login Info\n[2] Add new login\n[3] Edit login\n[4] Delete login\n[5] Exit\n")
+        if userChoice == '1':
+            viewLogin()
+        if userChoice == '2':
+            createItem()
+        if userChoice == '3':
+            deleteLogin()
+        if userChoice == '4':
+            deleteLogin()
+        if userChoice == '5':
+            break
 
-def addItem():
+
+def createItem():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    ltuple = ('test','test','test.com')
-    c.execute("SELECT * FROM user_password")
-    c.execute("INSERT INTO user_password VALUES (?,?,?)", ltuple)
-    a = c.fetchall()
-    print(a)
+    new_name = input("Please enter the name of login: ")
+    new_username = input("Please enter your username: ")
+    new_password = input("Please enter your password: ")
+    new_website = input("Please entire url: ")
+    new_tuple = (new_name, new_username, new_password, new_website)
+    c.execute('INSERT INTO user_password (name, username, password, website) VALUES (?, ?, ?, ?)', new_tuple)
+    conn.commit()
+    conn.close()
+
+def viewLogin():
+    #find desired input
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    userChoice = input("Input name: "),
+    cls()
+    c.execute("SELECT * FROM user_password WHERE name=?", userChoice)
+    choiceList = [c.fetchone()] #saving as a list will ensure that tabulate iterates properly
+    choiceCopy = c.fetchone()
+    conn.commit()
+    conn.close()
+    #find desired input
+    print(tabulate(choiceList, headers=['name','username','password','website url']))
+    userChoice = input("\n[1] Copy username to clipboard\n[2] Copy password to clipboard\n[3] Exit without doing anything\n")
+    if userChoice == 1:
+        pyperclip.copy(choiceCopy.index(1))
+def editLogin():
+    pass
+
+def deleteLogin():
+    pass
 
 def notesMenu():
     pass
