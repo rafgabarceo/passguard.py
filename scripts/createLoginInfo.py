@@ -11,7 +11,6 @@ print(master_tuple)
 c.execute('SELECT * FROM master_user_password')
 c.execute('INSERT into master_user_password VALUES (?, ?)', master_tuple)
 a = c.fetchone()
-print(a)
 
 conn.commit()
 conn.close()
