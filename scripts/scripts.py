@@ -95,7 +95,6 @@ def passwordMenu():
         a = c.fetchall()
         conn.commit()
         conn.close
-        print(a)
         print(tabulate(a, headers=['name','username','website'], tablefmt='github'))
         userChoice = input("\nWhat would you like to do?\n[1] View Login Info\n[2] Add new login\n[3] Edit login\n[4] Delete login\n[5] Exit\n")
         if userChoice == '1':
@@ -111,6 +110,7 @@ def passwordMenu():
 
 
 def createItem():
+    cls()
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     new_name = input("Please enter the name of login: ")
@@ -121,6 +121,7 @@ def createItem():
     c.execute('INSERT INTO user_password (name, username, password, website) VALUES (?, ?, ?, ?)', new_tuple)
     conn.commit()
     conn.close()
+    cls()
 
 def viewLogin():
     #find desired input
@@ -130,14 +131,32 @@ def viewLogin():
     cls()
     c.execute("SELECT * FROM user_password WHERE name=?", userChoice)
     choiceList = [c.fetchone()] #saving as a list will ensure that tabulate iterates properly
-    choiceCopy = c.fetchone()
     conn.commit()
     conn.close()
     #find desired input
     print(tabulate(choiceList, headers=['name','username','password','website url']))
     userChoice = input("\n[1] Copy username to clipboard\n[2] Copy password to clipboard\n[3] Exit without doing anything\n")
-    if userChoice == 1:
-        pyperclip.copy(choiceCopy.index(1))
+    if userChoice == '1':
+        counter = 0
+        for element in choiceList:
+            for item in element: #brute force; will get the 2nd index in the tuple
+                counter += 1
+                if counter == 2:
+                    print(f"Copying username to clipboard...")
+                    pyperclip.copy(item)
+                    print("Copied!")
+                    cls()
+    if userChoice == '2':
+        counter = 0 #initialize counter
+        for element in choiceList:
+            for item in element: #brute force; will get the 2nd index in the tuple
+                counter += 1
+                if counter == 3:
+                    print(f"Copying password to clipboard...")
+                    pyperclip.copy(item)
+                    print("Copied!")
+                    cls()
+
 def editLogin():
     pass
 
@@ -146,7 +165,6 @@ def deleteLogin():
 
 def notesMenu():
     pass
-
 
 
 

@@ -1,2 +1,2 @@
-from scripts import scripts
-scripts.viewLogin()
+from scripts.scripts import *
+viewLogin()
