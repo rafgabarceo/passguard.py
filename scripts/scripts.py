@@ -96,7 +96,7 @@ def passwordMenu():
         conn.commit()
         conn.close
         print(tabulate(a, headers=['name','username','website'], tablefmt='github'))
-        userChoice = input("\nWhat would you like to do?\n[1] View Login Info\n[2] Add new login\n[3] Edit login\n[4] Delete login\n[5] Exit\n")
+        userChoice = input("\nWhat would you like to do?\n[1] View Login Info\n[2] Add new login\n[3] Delete login\n[4] Back to main menu\n")
         if userChoice == '1':
             viewLogin()
         if userChoice == '2':
@@ -104,8 +104,6 @@ def passwordMenu():
         if userChoice == '3':
             deleteLogin()
         if userChoice == '4':
-            deleteLogin()
-        if userChoice == '5':
             break
 
 
@@ -124,41 +122,65 @@ def createItem():
     cls()
 
 def viewLogin():
-    #find desired input
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    userChoice = input("Input name: "),
-    cls()
-    c.execute("SELECT * FROM user_password WHERE name=?", userChoice)
-    choiceList = [c.fetchone()] #saving as a list will ensure that tabulate iterates properly
-    conn.commit()
-    conn.close()
-    #find desired input
-    print(tabulate(choiceList, headers=['name','username','password','website url']))
-    userChoice = input("\n[1] Copy username to clipboard\n[2] Copy password to clipboard\n[3] Exit without doing anything\n")
-    if userChoice == '1':
-        counter = 0
-        for element in choiceList:
-            for item in element: #brute force; will get the 2nd index in the tuple
-                counter += 1
-                if counter == 2:
-                    print(f"Copying username to clipboard...")
-                    pyperclip.copy(item)
-                    print("Copied!")
-                    cls()
-    if userChoice == '2':
-        counter = 0 #initialize counter
-        for element in choiceList:
-            for item in element: #brute force; will get the 2nd index in the tuple
-                counter += 1
-                if counter == 3:
-                    print(f"Copying password to clipboard...")
-                    pyperclip.copy(item)
-                    print("Copied!")
-                    cls()
+    while True:
+        #find desired input
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        userChoice = input("Input name: "),
+        cls()
+        c.execute("SELECT * FROM user_password WHERE name=?", userChoice)
+        choiceList = [c.fetchone()] #saving as a list will ensure that tabulate iterates properly
+        conn.commit()
+        conn.close()
+        #find desired input
+        print(tabulate(choiceList, headers=['name','username','password','website url']))
+        userChoice = input("\n[1] Copy username to clipboard\n[2] Copy password to clipboard\n[3] Edit name\n[4] Edit password\n[5] Edit website\n[6] Exit\n")
+        if userChoice == '1':
+            counter = 0
+            for element in choiceList:
+                for item in element: #brute force; will get the 2nd index in the tuple
+                    counter += 1
+                    if counter == 2:
+                        print(f"Copying username to clipboard...")
+                        pyperclip.copy(item)
+                        print("Copied!")
+                        cls()
+        if userChoice == '2':
+            counter = 0 #initialize counter
+            for element in choiceList:
+                for item in element: #brute force; will get the 2nd index in the tuple
+                    counter += 1
+                    if counter == 3:
+                        print(f"Copying password to clipboard...")
+                        pyperclip.copy(item)
+                        print("Copied!")
+                        cls()
+        if userChoice == '3':
+            editInfo = input("Enter edit: "),
+            counter = 0
+            for element in choiceList:
+                for item in element:
+                    counter += 1
+                    if counter == 1:
+                        return item
+            c.executemany("UPDATE user_password SET name = ? WHERE name = ?", item, editInfo)
+        if userChoice == '4':
+            pass 
+        if userChoice == '5':
+            pass
+        if userChoice == '6':
+            break
 
 def editLogin():
-    pass
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    userEntry = input("Enter the name of the entry to edit")
+    userChoice = input("What do you want to edit?: ")
+    userAppend = input("What do you want to edit it to?: ")
+    userFinal = userChoice, userAppend, userEntry,
+    c.executemany("UPDATE user_password SET ? = ? WHERE name = ?",userFinal)
+    a = c.fetchone()
+    print("Updating!")
 
 def deleteLogin():
     pass
