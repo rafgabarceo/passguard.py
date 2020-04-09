@@ -3,6 +3,6 @@ import os.path
 from os import path
 print("Checking if database exists...")
 if path.exists("database.db") == False:
-    import initdb
+    from scripts import initdb
 else:
-    import loginScreen
+    from scripts import loginScreen
