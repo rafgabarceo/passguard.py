@@ -1,6 +1,6 @@
 #will contain all functions required for the program
 import sqlite3
-import getpass as getpass
+from getpass import getpass
 import time
 import sys
 import os.path
@@ -67,7 +67,7 @@ def loginScreen():
     print()
     while counter < 5: 
         username = input("Please enter your username: ")
-        password = input("Please enter your password: ")
+        password = getpass("Please enter your password: ")
         if username == master_username and password == master_password:
             break
         counter = counter + 1
@@ -88,7 +88,7 @@ def mainMenu():
             passwordMenu()
         if x == '2':
             cls()
-            print("Notes")
+            notesMenu()
         if x == '3':
             cls()
             os._exit(1)
@@ -142,7 +142,7 @@ def createItem():
                 break
         new_password = passwordGenerator(length) #will pass the variable length into the function. The value of the function will become the password
     else:
-        new_password = input("Please input your password: ")
+        new_password = getpass("Please input your password: ")
     new_website = input("Please entire url: ")
     new_tuple = (new_name, new_username, new_password, new_website)
     c.execute('INSERT INTO user_password (name, username, password, website) VALUES (?, ?, ?, ?)', new_tuple)
@@ -207,6 +207,7 @@ def viewLogin():
             if userChoice == '3':
                 editInfo = input("Enter edit: ")
                 tuple_edit = (editInfo, name)
+                c.execute("UPDATE user_password SET name = ? WHERE name = ?", tuple_edit)
                 cls()
                 continue
             if userChoice == '4':
@@ -285,7 +286,119 @@ def deleteLogin():
                 continue
 
 def notesMenu():
-    pass
+    while True:
+        print("Passguard.py - Secure Notes".center(100,"="))
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute("SELECT title FROM secure_notes")
+        a = c.fetchall()
+        conn.commit()
+        conn.close
+        print(tabulate(a, headers=['title'], tablefmt='github'))
+        userChoice = input("\nWhat would you like to do?\n[1] View note\n[2] Add new note\n[3] Delete note\n[4] Back to main menu\n")
+        if userChoice == '1':
+            viewNote()
+        if userChoice == '2':
+            createNote()
+        if userChoice == '3':
+            deleteNote()
+        if userChoice == '4':
+            cls()
+            break
 
+def viewNote():
+    #find desired input
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    userChoice = input("Input title: "),
+    cls()
+    #find desired input
+    while True:
+        c.execute("SELECT * FROM secure_notes WHERE title=?", userChoice)
+        choiceList = [c.fetchone()] #saving as a list will ensure that tabulate iterates properly
+        conn.commit()
+        #brute force initialization#
+        counter = 0
+        for element in choiceList:
+            for item in element:
+                if counter == 0:
+                    title = item
+                    counter += 1
+                    continue
+                if counter == 1:
+                    note = item
+                    counter += 1
+                    continue
+        try:
+            print(tabulate(choiceList, headers=['title','note']))
+        except:
+            cls()
+            print("Note does not exist!")
+            break
+        else:
+            userChoice = input("\n[1] Copy note to clipboard\n[2] Edit note\n[3] Exit")
+            if userChoice == '1':
+                print("Copying note...")
+                pyperclip.copy(note)
+                break
+            if userChoice == '2':
+                userEdit = input("Add your new edit here: ")
+                new_note = note + userEdit
+                new_tuple = (new_note, note)
+                c.execute("UPDATE secure_notes SET notes = ? WHERE notes = ?",new_tuple)
+                conn.commit()
+                conn.close()
+                break
+            if userChoice == '3':
+                break
+
+def createNote():
+    cls()
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    while True: #enters while loop to continue forever the input if name keeps existing.
+        new_title = input("Please Title: ")
+        title_checker = new_title,
+        #name checker
+        c.execute('SELECT title FROM secure_notes WHERE title = ?', title_checker,)
+        data_checker = c.fetchone() 
+        if data_checker != None:
+            print("Name already exists!")
+            continue
+        else: 
+            break
+    userNote = input("Press Enter to end notetaking and save note.\n")
+    new_tuple = (new_title, userNote)
+    c.execute('INSERT INTO secure_notes (title, notes) VALUES (?, ?)', new_tuple)
+    conn.commit()
+    conn.close()
+
+def deleteNote():
+    while True:
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        userEntry = input("Please input the title of the note you want to delete: ")
+        userEntryChecker = userEntry,
+        c.execute("SELECT name FROM user_password WHERE name = ?", userEntryChecker)
+        fetcher = c.fetchone()
+        if fetcher == None:
+            print("Does not exist! Please enter a valid name")
+            continue
+        userVeri = input("Please input the title of the note again. Remember, you cannot undo this!\n")
+        if userEntry == userVeri:
+            userEntry = userEntry,
+            c.execute("DELETE FROM secure_notes WHERE title = ?", userEntry)
+            conn.commit()
+            conn.close()
+            cls()
+            break
+        else:
+            failSafe = input("Not the same! If you don't want to continue, please type: exit\n")
+            failSafe.lower
+            if failSafe == 'exit':
+                cls()
+                break
+            else:
+                continue
 
 
