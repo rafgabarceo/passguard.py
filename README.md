@@ -7,9 +7,10 @@ This is a Python-based password manager. This is for educational purposes only, 
 Passguard uses Python's built SQLite3 module for its database. SQLite3 is a lightweight, easy to use version of SQL. In order to encrypt the data, Passguard uses the SQLCipher that can be imported. The modules required to run will be stated below.
 
 ## Required modules
-Passguard requires a few modules that can be installed through Python's package manager, pip.
+Passguard requires a few modules that can be installed through Python's package manager, pip. You will need to install tabulate and pyperclip.
 
-*Tabulate - helps with the formatting of the database `pip install tabulate`
-*Pyperclip - main module that deals with copy and pasting `pip install pyperclip`
+`pip install tabulate` and `pip install pyperclip`
+
+
 
 
