@@ -9,6 +9,12 @@ from os import path
 import pyperclip
 import string
 from random import *
+import base64
+import os
+from cryptography.fernet import Fernet
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 passguardWelcome = "Welcome to Passguard.py!".center(100,"=")
 passguard = "Passguard.py".center(100,"=")
 def cls():
@@ -29,48 +35,99 @@ def initializeDatabase():
     conn.close()
     cls()
 
-def initializeCrypto():
-    pass
+def initializeCrypto(master_username, master_password):
+    password_provided = f"{master_password}340572304587234095832745{master_username}"
+    password = password_provided.encode() #Convert to type bytes
+
+    salt = b'\xa6\xaaQ|Y\x9bf\xbfn\xad\x1byE\xea\x0e\xea'
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=10000,
+        backend=default_backend()
+    )
+
+    key = base64.urlsafe_b64encode(kdf.derive(password))
+    file = open('key.key','wb')
+    file.write(key)
+    file.close
+
+def verifyCrypto(username, password):
+    password_provided = f"{password}340572304587234095832745{username}"
+    password = password_provided.encode() #Convert to type bytes
+
+    salt = b'\xa6\xaaQ|Y\x9bf\xbfn\xad\x1byE\xea\x0e\xea'
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=10000,
+        backend=default_backend()
+    )
+
+    key = base64.urlsafe_b64encode(kdf.derive(password))
+
+    file = open('key.key.','rb')
+    origin = file.read()
+    file.close()
+    if origin == key:
+        return True
+    else:
+        return False
+
+def encrypt():
+    file = open('key.key','rb')
+    key = file.read()
+    file.close()
+
+    with open('database.db','rb') as f:
+        data = f.read()
+
+    fernet = Fernet(key)
+    encrypted = fernet.encrypt(data)
+
+    with open('database.db','wb') as f:
+        f.write(encrypted) 
+
+def decrypt():
+    file = open('key.key','rb')
+    key = file.read()
+    file.close()
+
+    with open('database.db','rb') as f:
+        data = f.read()
+
+    fernet = Fernet(key)
+    encrypted = fernet.decrypt(data)
+
+    with open('database.db','wb') as f:
+        f.write(encrypted) 
 
 def createLoginInfo():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
 
     master_username = input("Please enter your master username: ")
-    master_password = input("Please enter your master password: ")
+    master_password = getpass("Please enter your master password: ")
+    initializeCrypto(master_username, master_password)
     master_tuple = (master_username, master_password)
     c.execute('INSERT INTO master_user_password (master_username, master_password) VALUES (?, ?)', master_tuple)
     conn.commit()
     conn.close()
-    #cls()
+    encrypt()
+    cls()
 
 def loginScreen():
-    conn = sqlite3.connect("database.db")
     counter = 0
-    c = conn.cursor()
-
-    #Grab username and password from the master_user_password database
-    c.execute("SELECT master_username FROM master_user_password")
-    master_username = c.fetchone()
-    c.execute("SELECT master_password FROM master_user_password")
-    master_password = c.fetchone()
-    conn.commit()
-    conn.close()
-    #Grab username and password from the master_user_password database
-
-    # #iterate over tuple to get main element 
-    for element in master_username: 
-        master_username = element
-    for element in master_password:
-        master_password = element
-    #iterate over tuple to get main element
-    print()
     while counter < 5: 
         username = input("Please enter your username: ")
         password = getpass("Please enter your password: ")
-        if username == master_username and password == master_password:
-            break
-        counter = counter + 1
+        if verifyCrypto(username, password) == True:
+            decrypt()
+            mainMenu()
+        else:
+            counter = counter + 1
         print(f"Oops! Wrong username and password. You have {5-counter} attempts left.")
     if counter == 5:
         print("Exiting program")
@@ -91,6 +148,7 @@ def mainMenu():
             notesMenu()
         if x == '3':
             cls()
+            encrypt()
             os._exit(1)
 
 def passwordMenu():
