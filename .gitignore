@@ -3,3 +3,5 @@
 *.key
 *.pyc
 *.pyc
+.vscode/launch.json
+scripts/__pycache__/scripts.cpython-38.pyc
