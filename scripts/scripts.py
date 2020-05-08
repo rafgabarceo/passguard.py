@@ -125,11 +125,6 @@ def loginScreen():
         password = getpass("Please enter your password: ")
         if verifyCrypto(username, password) == True:
             try:
-                decrypt()
-            except:
-                import time
-                print("Database.db is already decrypted.\nPlease exit session through the main menu to ensure database.db is decrypted.")
-                time.sleep(2.5)
                 print("WARNING: PROGRAM DATABASE IS DECRYPTED. PLEASE SHUTDOWN PROPERLY ON EXIT.")
             decrypt()
             mainMenu()
@@ -196,8 +191,8 @@ def createItem():
         else: 
             break
     new_username = input("Please enter your username: ")
-    new_password_choice = input("Would you like to generate a random password?: ").lower()
-    if "yes" in new_password_choice:
+    new_password_choice = input("Would you like to generate a random password?: ")
+    if new_password_choice == 'yes' or 'Yes': 
         while True:
             try:
                 length = int(input("How long would you want your password to be? Please input a length: "))
@@ -283,8 +278,8 @@ def viewLogin():
                 cls() 
                 continue
             if userChoice == '5':
-                new_password_choice = input("Would you like to generate a random password?: ").lower()
-                if "yes" in new_password_choice:
+                new_password_choice = input("Would you like to generate a random password?: ")
+                if new_password_choice == 'yes' or 'Yes': 
                     while True:
                         try:
                             length = int(input("How long would you want your password to be? Please input a length: "))
@@ -362,10 +357,7 @@ def notesMenu():
         print(tabulate(a, headers=['title'], tablefmt='github'))
         userChoice = input("\nWhat would you like to do?\n[1] View note\n[2] Add new note\n[3] Delete note\n[4] Back to main menu\n")
         if userChoice == '1':
-            try:
-                viewNote()
-            except:
-                break
+            viewNote()
         if userChoice == '2':
             createNote()
         if userChoice == '3':
@@ -447,7 +439,7 @@ def deleteNote():
         c = conn.cursor()
         userEntry = input("Please input the title of the note you want to delete: ")
         userEntryChecker = userEntry,
-        c.execute("SELECT title FROM secure_notes WHERE title = ?", userEntryChecker)
+        c.execute("SELECT name FROM user_password WHERE name = ?", userEntryChecker)
         fetcher = c.fetchone()
         if fetcher == None:
             print("Does not exist! Please enter a valid name")
