@@ -124,6 +124,8 @@ def loginScreen():
         username = input("Please enter your username: ")
         password = getpass("Please enter your password: ")
         if verifyCrypto(username, password) == True:
+            try:
+                print("WARNING: PROGRAM DATABASE IS DECRYPTED. PLEASE SHUTDOWN PROPERLY ON EXIT.")
             decrypt()
             mainMenu()
         else:
