@@ -130,8 +130,6 @@ def loginScreen():
                 import time
                 print("Database.db is already decrypted.\nPlease exit session through the main menu to ensure database.db is decrypted.")
                 time.sleep(2.5)
-                print("WARNING: PROGRAM DATABASE IS DECRYPTED. PLEASE SHUTDOWN PROPERLY ON EXIT.")
-            decrypt()
             mainMenu()
         else:
             counter = counter + 1
